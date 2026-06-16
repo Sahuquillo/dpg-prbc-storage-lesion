@@ -134,6 +134,7 @@ identifiers are present in any deposited file.
 ## Contact
 
 Juan Sahuquillo, MD, PhD  
+Department of Neurosurgery
 Neurotraumatology and Neurosurgery Research Unit (UNINN)  
 Vall d'Hebron University Hospital, Barcelona, Spain  
 sahuquillo@neurotrauma.net
