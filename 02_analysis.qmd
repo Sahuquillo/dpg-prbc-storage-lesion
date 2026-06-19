@@ -76,7 +76,7 @@ library(tidyverse)
 
 ```{r}
 # Establish the file path
-path <- here("data", "2_3_DPG.rds")
+path <- here("data", "dpg_data.rds")
 path
 mydata <- readRDS(path)
 
@@ -241,7 +241,7 @@ robust_test
 # pH analysis
 
 ```{r}
-path_ph <- here("data", "Stored_blood_pH.rds")
+path_ph <- here("data", "ph_data.rds")
 path_ph
 mydata_ph <- readRDS(path_ph)
 head(mydata_ph)

@@ -79,7 +79,7 @@ library(writexl)
 #| message: false
 
 # Establish the file path
-path <- here("data", "2,3-dpg.xlsx")
+path <- here("data", "dpg_raw.xlsx")
 path
 readxl::excel_sheets(path)
 import <- readxl::read_excel(
@@ -108,7 +108,7 @@ glimpse (mydata)
 # Save the final RDS data file
 
 ```{r}
-saveRDS(mydata, file = here("data", "2_3_DPG.rds"))
+saveRDS(mydata, file = here("data", "dpg_data.rds"))
 ```
 
 # Import pH dataset
@@ -119,7 +119,7 @@ saveRDS(mydata, file = here("data", "2_3_DPG.rds"))
 #| eval: false
 
 # Secure the path relative to the project root
-ph_path <- here("data", "pH.xlsx")
+ph_path <- here("data", "pH_raw.xlsx")
 ph_path
 # Audit sheet names
 readxl::excel_sheets(ph_path)
@@ -145,5 +145,5 @@ glimpse(mydata_ph)
 # Save the final pH rds.data file
 
 ```{r}
-saveRDS(mydata_ph, file = here("data", "Stored_blood_pH.rds"))
+saveRDS(mydata_ph, file = here("data", "ph_data.rds"))
 ```
