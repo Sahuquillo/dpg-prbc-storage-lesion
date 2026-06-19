@@ -1,0 +1,8 @@
+Place the following files in this folder before uploading to GitHub:
+
+- dpg_raw.xlsx   (raw LC–MS data — optional, see README)
+- pH_raw.xlsx    (raw pH data — optional, see README)
+- dpg_data.rds   (cleaned, anonymized DPG dataset — required)
+- ph_data.rds    (cleaned, anonymized pH dataset — required)
+
+Delete this file (PLACEHOLDER.txt) once the real data files are in place.

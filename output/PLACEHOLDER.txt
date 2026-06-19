@@ -1,0 +1,9 @@
+Place the rendered Quarto HTML outputs in this folder:
+
+- 01_data_preparation.html
+- 02_analysis.html
+
+Generate these by rendering the corresponding .qmd files in RStudio
+(Render button, or `quarto render <file>.qmd` in the terminal).
+
+Delete this file (PLACEHOLDER.txt) once the real output files are in place.

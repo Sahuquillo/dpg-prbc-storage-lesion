@@ -1,0 +1,410 @@
+---
+title: "2,3-DPG and pH in stored RBC"
+subtitle: "Reproducible analysis — *Journal of Neurotrauma* submission"
+author:
+  - name: Juan Sahuquillo
+  - name: Marta Peris
+date: "2026-02-02"
+date-modified: "2026-06-18"
+abstract: |
+  The efficacy of red blood cell (RBC) transfusions depends on oxygen
+  delivery, which deteriorates during storage due to the "storage lesion,"
+  notably 2,3-diphosphoglycerate (2,3-DPG) depletion. We characterized
+  the temporal dynamics of 2,3-DPG depletion and metabolic acidification
+  in 24 leukodepleted packed RBC units stored under standard conditions
+  from day 3 to 42. 2,3-DPG concentrations (µmol/g Hb) were quantified
+  using liquid chromatography–mass spectrometry (LC–MS) with isotopically
+  labeled internal standards, alongside parallel pH measurements. Baseline
+  (day 3) 2,3-DPG levels showed substantial inter-unit variability (median
+  4.8 µmol/g Hb; range 0.8–14.7). A rapid decline occurred across all
+  units, dropping to ~27% of baseline by day 7, >90% by day 14, and
+  falling below the detection limit after day 17. Mixed-effects modeling
+  confirmed a strong negative association between storage duration and
+  2,3-DPG (β = −0.298 µmol/g Hb/day; p < 0.001). Concurrently, pH
+  decreased progressively from 7.06 ± 0.06 to 6.40 ± 0.04 (p < 0.001).
+  In conclusion, 2,3-DPG depletion is an early, rapid phenomenon linked
+  to acidification that impairs oxygen unloading. Preserving 2,3-DPG is
+  a critical, modifiable target for improving stored RBC quality,
+  suggesting that storage duration alone may be an inadequate surrogate
+  for RBC metabolic quality.
+editor: visual
+editor_options:
+  chunk_output_type: console
+format:
+  html:
+    toc: true
+    number-sections: true
+    self-contained: true
+---
+
+# Settings for R session
+
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
+Sys.setenv(LANG = "en")
+graphics.off()
+options(scipen=999, digits=4)
+```
+
+# Load libraries
+
+```{r}
+#| label: packages
+#| message: false
+#| warning: false
+library(broom.mixed) # for tidying up linear models 
+library(emmeans) # for the joint_tests() function 
+library(flextable)
+library(ggthemes)
+library(here)
+library(janitor) # cleaning column names
+library(kableExtra) #nice tles
+library(lme4)
+library(lmerTest)
+library(patchwork)
+library(psych)
+library(stargazer)
+library(sjPlot)
+library(tidyverse)
+
+```
+
+# Import 2,3_DPG dataset
+
+```{r}
+# Establish the file path
+path <- here("data", "2_3_DPG.rds")
+path
+mydata <- readRDS(path)
+
+glimpse(mydata)
+```
+
+# Convert Day 3 to 3 into a new column (day_num)
+
+```{r}
+mydata <- mydata |> 
+  dplyr::mutate(day_num = readr::parse_number(day))|>
+  dplyr::select(day_num, everything())
+head(mydata)
+```
+
+# Pivot longer
+
+```{r}
+#| label: pivot-long
+long_data<- mydata |> 
+  pivot_longer(
+    cols = -c(day_num, day),
+    names_to = "bag_id",
+    values_to = "dpg_level"
+  ) |> 
+  filter(!is.na(dpg_level))
+head(long_data)
+```
+
+# Summarize by day
+
+```{r}
+#| label: descriptive-stats-dpg
+
+library(psych)
+desc_dpg <- psych::describeBy(long_data$dpg_level, group = long_data$day_num, mat = TRUE)
+desc_dpg
+
+```
+
+# 4. Calculate Summary Statistics
+
+```{r}
+long_summary <- long_data |> 
+  group_by(day_num) |> 
+  summarize(
+    N       = n(),
+    Mean    = mean(dpg_level, na.rm = TRUE),   # Added na.rm = TRUE for safety
+    Median  = median(dpg_level, na.rm = TRUE),
+    SD      = sd(dpg_level, na.rm = TRUE),
+    min     = min(dpg_level, na.rm = TRUE),
+    max     = max(dpg_level, na.rm = TRUE)
+  ) |> 
+  # 1. Explicitly sort by time step to guarantee row 1 is the true baseline
+  arrange(day_num) |> 
+  # 2. Calculate percentage relative to the true baseline day
+  mutate(Pct_left = (Mean / first(Mean)) * 100)
+
+print(long_summary)
+
+```
+
+# Check for normality
+
+```{r}
+day3_dpg <- long_data |> 
+  filter(day_num == 3) |> 
+  pull(dpg_level)
+
+summary(day3_dpg)
+hist(day3_dpg, main = "Day 3 DPG Levels", col = "lightblue")
+qqnorm(day3_dpg)
+qqline(day3_dpg, col = "red")
+shapiro.test(day3_dpg)
+```
+
+# Boxplot 2,3-DPG by day
+
+```{r}
+plot1<-ggplot(long_data, aes(x = factor(day_num), y = dpg_level)) +
+  stat_boxplot(geom = "errorbar", width = 0.3, color = "gray30", size = 0.62) +
+  geom_boxplot(fill = "gray90", color = "gray30", outlier.alpha = 0.5, linewidth = 0.62) +
+  geom_jitter(size = 3, width = 0.1, alpha = 0.65, color = "steelblue") +
+    theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 13),
+    axis.title.x = element_text(face = "bold", size = 13),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.text.y = element_text(face = "bold", size = 12)
+  ) +
+  labs(
+    title = "2,3-DPG by Day",
+    subtitle = "",
+    x = "Storage Day",
+    y = "2,3-DPG (µmol/g Hb)"
+  )
+plot1
+```
+
+# Spaghetti plot
+
+```{r}
+plot2<-ggplot(long_data, aes(x = day_num, y = dpg_level, group = bag_id)) +
+  geom_line(color = "steelblue", alpha = 0.5, size = 0.7) +
+  geom_point(color = "steelblue", alpha = 0.6, size = 2) +
+  
+  # 3. Add a heavy black line for the Population Mean
+  stat_summary(aes(group = 1), fun = mean, geom = "line", 
+               color = "red", size = 1.2) +
+theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    axis.title = element_text(face = "bold", size = 14),
+    axis.text = element_text(face = "bold", size = 12)
+  ) +
+  labs(
+    title = "Individual 2,3-DPG trajectories",
+    subtitle = "",
+    x = "Storage Day",
+    y = "2,3-DPG (µmol/g Hb)"
+  ) +
+  # X-axis only shows the days you measured
+  scale_x_continuous(breaks = c(3, 7, 10, 14, 17))
+plot2
+
+```
+
+# Join plots
+
+```{r}
+library(patchwork)
+plot1 + plot2
+
+```
+
+# Linear mixed models analysis for 2,3-DPG
+
+```{r}
+#| label: model1-dpg-lmm
+#| message: false
+#| warning: false
+
+# LMM: 2,3-DPG ~ storage day with random intercept for pRBC unit
+# REML = TRUE for unbiased variance component estimation
+model1 <- lmer(dpg_level ~ day_num + (1 | bag_id), data = long_data, REML = TRUE)
+summary(model1)
+
+# Note: lmer() returns a singular fit (random intercept variance = 0),
+# indicating no detectable between-bag baseline heterogeneity after
+# accounting for the strong time trend. Cluster-robust SEs (CR2) via
+# clubSandwich are reported to account for the repeated-measures structure.
+robust_test <- clubSandwich::coef_test(
+  model1,
+  vcov       = "CR2",
+  cluster    = long_data$bag_id,
+  test       = "Satterthwaite"
+)
+robust_test
+```
+
+# pH analysis
+
+```{r}
+path_ph <- here("data", "Stored_blood_pH.rds")
+path_ph
+mydata_ph <- readRDS(path_ph)
+head(mydata_ph)
+```
+
+# Convert Day 3 to 3
+
+```{r}
+mydata_ph <-mydata_ph |> 
+  mutate(day_num = readr::parse_number(day))|> 
+  select(day_num, everything())
+
+mydata_ph$day_num <- factor(
+  mydata_ph$day_num,
+  levels = c(3,7,11,14,17,21,25,28,32,37,42)
+)
+head(mydata_ph)
+```
+
+#Pivot longer the pH dataframe
+
+```{r}
+long_data_ph<- mydata_ph |> 
+  pivot_longer(
+    cols = -c(day_num, day),
+    names_to = "bag_id",
+    values_to = "pH"
+  ) |> 
+  filter(!is.na(pH))
+head(long_data_ph)
+```
+
+# Summarize pH by day
+
+```{r}
+
+library(psych)
+psych::describeBy(long_data_ph$pH, group = long_data_ph$day_num, mat = TRUE)
+
+```
+
+# Calculate Summary Statistics
+
+```{r}
+long_summary_ph <- long_data_ph |>
+  group_by(day_num) |> 
+  summarize(
+    N = n(),
+    Mean = mean(pH, na.rm = TRUE),
+    Median = median(pH, na.rm = TRUE),
+    SD = sd(pH, na.rm = TRUE),
+    min = min(pH, na.rm = TRUE),
+    max = max(pH, na.rm = TRUE)
+  ) |> 
+  mutate(Pct_left = (Mean / first(Mean)) * 100)
+
+print(long_summary_ph)
+```
+
+# Boxplot pH by day
+
+```{r}
+plot3 <- ggplot(long_data_ph, aes(x = factor(day_num), y = pH)) +
+stat_boxplot(geom = "errorbar", width = 0.3, height = 0.2, color = "gray30", size = 0.62) +
+geom_boxplot(fill = "orange", color = "gray30", outlier.alpha = 0.5, linewidth = 0.62) +
+coord_cartesian(ylim = c(6.25, 7.40)) +
+scale_y_continuous(breaks = seq(6.25, 7.40, 0.1))+
+geom_jitter(size = 2, width = 0.1, alpha = 0.65, color = "steelblue") +
+theme_minimal(base_size = 12) +
+theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 13),
+    axis.title.x = element_text(face = "bold", size = 13),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12,),
+    axis.text.y = element_text(face = "bold", size = 12)
+  ) +
+labs(
+  title = "",
+  subtitle = "",
+  x = "Storage Day",
+  y = "pH"
+  )
+
+plot3
+```
+
+# Linear mixed models analysis for pH
+
+```{r}
+str(long_data_ph)
+head(long_data_ph)
+# Linear model
+lin.model<- lm (formula = pH ~ day_num, data = long_data_ph)
+summary(lin.model)
+print(lin.model)
+predicted <- predict(lin.model)
+
+# Deconstruct lin.model
+x <- as.numeric(long_data_ph$day_num)
+y <- long_data_ph$pH
+
+y.pred <- 7.0021 + x*(-0.0163)
+SS.resid <- sum((y - y.pred)^2 )
+SS.tot <- sum((y - mean(y))^2 )
+r <- cor(x, y)
+R.squared <- 1 - (SS.resid / SS.tot)
+print(SS.tot)
+print(SS.resid)
+print(R.squared)
+print( r^2 )
+
+```
+
+# Linear Mixed Model for pH
+
+```{r}
+library(lme4)
+library(lmerTest)
+library(emmeans)
+library(dplyr)
+
+# Ensure correct ordering
+long_data_ph <- long_data_ph |>
+  arrange(day_num) |>
+  mutate(day_num = factor(day_num, levels = unique(day_num)))
+
+# Confirm dataset
+long_data_ph |> count(day_num)
+
+# Fit model
+model_ph <- lmer(
+  pH ~ day_num + (1 | bag_id),
+  data = long_data_ph,
+  REML = TRUE
+)
+
+summary(model_ph)
+
+# Estimated marginal means
+emm_ph <- emmeans(
+  model_ph,
+  ~ day_num,
+  lmer.df = "satterthwaite"
+)
+
+summary(emm_ph)
+
+# Contrasts vs Day 3
+selected_contrasts <- contrast(
+  emm_ph,
+  method = "trt.vs.ctrl",
+  ref = 1
+)
+
+summary(selected_contrasts, infer = TRUE)
+
+# Singularity check
+isSingular(model_ph)
+
+```
+
+# sessionInfo()
+
+```{r}
+sessionInfo()
+```

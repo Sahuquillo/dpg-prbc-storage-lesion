@@ -1,0 +1,149 @@
+---
+title: "2,3-DPG and pH in stored RBC"
+subtitle: "Reproducible analysis — *Journal of Neurotrauma* submission"
+author:
+  - name: Juan Sahuquillo
+  - name: Marta Peris
+date: "2026-02-02"
+date-modified: "2026-06-16"
+abstract: |
+  The efficacy of red blood cell (RBC) transfusions depends on oxygen
+  delivery, which deteriorates during storage due to the "storage lesion,"
+  notably 2,3-diphosphoglycerate (2,3-DPG) depletion. We characterized
+  the temporal dynamics of 2,3-DPG depletion and metabolic acidification
+  in 24 leukodepleted packed RBC units stored under standard conditions
+  from day 3 to 42. 2,3-DPG concentrations (µmol/g Hb) were quantified
+  using liquid chromatography–mass spectrometry (LC–MS) with isotopically
+  labeled internal standards, alongside parallel pH measurements. Baseline
+  (day 3) 2,3-DPG levels showed substantial inter-unit variability (median
+  4.8 µmol/g Hb; range 0.8–14.7). A rapid decline occurred across all
+  units, dropping to ~27% of baseline by day 7, >90% by day 14, and
+  falling below the detection limit after day 17. Mixed-effects modeling
+  confirmed a strong negative association between storage duration and
+  2,3-DPG (β = −0.298 µmol/g Hb/day; p < 0.001). Concurrently, pH
+  decreased progressively from 7.06 ± 0.06 to 6.40 ± 0.04 (p < 0.001).
+  In conclusion, 2,3-DPG depletion is an early, rapid phenomenon linked
+  to acidification that impairs oxygen unloading. Preserving 2,3-DPG is
+  a critical, modifiable target for improving stored RBC quality,
+  suggesting that storage duration alone may be an inadequate surrogate
+  for RBC metabolic quality.
+editor: visual
+editor_options:
+  chunk_output_type: console
+format:
+  html:
+    toc: true
+    number-sections: true
+    self-contained: true
+---
+
+# Settings for R session
+
+```{r}
+#| label: setup
+#| include: false
+
+Sys.setenv(LANG = "en")
+graphics.off()
+options(scipen=999, digits=4)
+```
+
+# Load libraries
+
+```{r}
+#| label: packages
+#| message: false
+#| warning: false
+
+library(broom)
+library(emmeans)
+library(flextable)
+library(ggthemes)
+library(here)
+library(janitor)
+library(lme4)
+library(lmerTest)
+library(performance)
+library(psych)
+library(readxl)
+library(rstatix)
+library(see) # Required for the visual plotting features
+library(tidyverse)
+library(writexl)
+```
+
+# Import 2,3_DPG dataset
+
+```{r}
+#| label: import-dpg
+#| message: false
+
+# Establish the file path
+path <- here("data", "2,3-dpg.xlsx")
+path
+readxl::excel_sheets(path)
+import <- readxl::read_excel(
+  path = path, 
+  sheet = "2,3-DPG(umol-gHb)", 
+  col_types = "text"
+)
+# Preview the first 6 rows of the imported matrix
+head(import)
+
+# Change first column name
+colnames(import)[1] <-"Day"
+
+# Fix variable names
+mydata <- import |> 
+  janitor::clean_names()
+
+mydata <- mydata |> 
+  mutate(across(-c(day), ~ as.numeric(.)))
+
+head(mydata)
+names(mydata)
+glimpse (mydata)
+```
+
+# Save the final RDS data file
+
+```{r}
+saveRDS(mydata, file = here("data", "2_3_DPG.rds"))
+```
+
+# Import pH dataset
+
+```{r}
+#| label: import-ph
+#| message: false
+#| eval: false
+
+# Secure the path relative to the project root
+ph_path <- here("data", "pH.xlsx")
+ph_path
+# Audit sheet names
+readxl::excel_sheets(ph_path)
+import_ph <- read_excel(ph_path, sheet = "pH", col_types = "text")
+head(import_ph)
+
+# Change first column name to Day
+colnames(import_ph)[1] <-"Day"
+
+# Fix variable names
+mydata_ph<-import_ph |> 
+  janitor::clean_names()
+head(mydata_ph)
+
+mydata_ph <- mydata_ph |> 
+  mutate(across(-c(day), ~ as.numeric(.)))
+
+head(mydata_ph)
+names(mydata_ph)
+glimpse(mydata_ph)
+```
+
+# Save the final pH rds.data file
+
+```{r}
+saveRDS(mydata_ph, file = here("data", "Stored_blood_pH.rds"))
+```
