@@ -2,13 +2,12 @@
 
 ## Citation
 
-Sahuquillo J, Peris M, Poca MA, Pons V, Rierola M. Rapid Depletion of
-2,3-DPG During Red Blood Cell Storage Assessed by Liquid
+Peris, M, Poca MA, Ortuño, A, Pons V, Rierola M and Sahuquillo, J. Rapid Depletion of 2,3-DPG During Red Blood Cell Storage Assessed by Liquid
 Chromatography–Mass Spectrometry (LC–MS): Implications for Oxygen
 Delivery in Neurocritical Patients. *Journal of Neurotrauma* (under
 review, 2026).
 
-Zenodo repository (data + code): [DOI to be provided at final submission]
+Zenodo repository (data + code): https://doi.org/10.5281/zenodo.20786075
 
 ---
 
@@ -30,8 +29,6 @@ intercepts for pRBC unit, fitted in R using lme4/lmerTest.
 ```
 repository/
 ├── README.md
-├── LICENSE-CODE
-├── LICENSE-DATA
 ├── 01_data_preparation.qmd    # reads raw Excel files, cleans, saves .rds
 ├── 02_analysis.qmd            # loads .rds files, runs all models and figures
 ├── data/
