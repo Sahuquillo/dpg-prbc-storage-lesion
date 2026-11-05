@@ -4,7 +4,7 @@
 
 Peris M, Poca MA, Ortuño A, Pons V, Rierola M, Sahuquillo J. Rapid Depletion of 2,3-DPG During Red Blood Cell Storage Assessed by Liquid Chromatography–Mass Spectrometry (LC–MS): Implications for Oxygen Delivery in Neurocritical Patients. *Cells* (in press, 2026).
 
-Zenodo repository (data + code): https://doi.org/10.5281/zenodo.20786075
+Zenodo repository (data + code): https://doi.org/10.5281/zenodo.20786074
 
 ---
 
