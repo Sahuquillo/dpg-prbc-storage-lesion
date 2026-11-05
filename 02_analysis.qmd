@@ -1,32 +1,13 @@
 ---
 title: "2,3-DPG and pH in stored RBC"
-subtitle: "Reproducible analysis — *Journal of Neurotrauma* submission"
+subtitle: "Reproducible analysis — *Cells* submission"
 author:
   - name: Juan Sahuquillo
   - name: Marta Peris
 date: "2026-02-02"
-date-modified: "2026-06-18"
+date-modified: "2026-11-1"
 abstract: |
-  The efficacy of red blood cell (RBC) transfusions depends on oxygen
-  delivery, which deteriorates during storage due to the "storage lesion,"
-  notably 2,3-diphosphoglycerate (2,3-DPG) depletion. We characterized
-  the temporal dynamics of 2,3-DPG depletion and metabolic acidification
-  in 24 leukodepleted packed RBC units stored under standard conditions
-  from day 3 to 42. 2,3-DPG concentrations (µmol/g Hb) were quantified
-  using liquid chromatography–mass spectrometry (LC–MS) with isotopically
-  labeled internal standards, alongside parallel pH measurements. Baseline
-  (day 3) 2,3-DPG levels showed substantial inter-unit variability (median
-  4.8 µmol/g Hb; range 0.8–14.7). A rapid decline occurred across all
-  units, dropping to ~27% of baseline by day 7, >90% by day 14, and
-  falling below the detection limit after day 17. Mixed-effects modeling
-  confirmed a strong negative association between storage duration and
-  2,3-DPG (β = −0.298 µmol/g Hb/day; p < 0.001). Concurrently, pH
-  decreased progressively from 7.06 ± 0.06 to 6.40 ± 0.04 (p < 0.001).
-  In conclusion, 2,3-DPG depletion is an early, rapid phenomenon linked
-  to acidification that impairs oxygen unloading. Preserving 2,3-DPG is
-  a critical, modifiable target for improving stored RBC quality,
-  suggesting that storage duration alone may be an inadequate surrogate
-  for RBC metabolic quality.
+  Red blood cell (RBC) transfusion aims to restore tissue oxygen delivery, yet a stored unit's capacity to unload oxygen depends on 2,3-diphosphoglycerate (2,3-DPG), the principal allosteric modulator of hemoglobin–oxygen affinity. Randomized trials comparing fresher with older units have been consistently null, and all have used storage duration as the exposure variable. We asked whether storage age reflects the metabolic state of individual units. Twenty-four leukodepleted packed RBC units were sampled serially from day 3 to day 42 of standard cold storage. 2,3-DPG was quantified by liquid chromatography–mass spectrometry (LC–MS) with isotopically labelled internal standards, pH was measured in parallel, and trajectories were modelled by linear mixed effects with unit-level random intercepts. At day 3, 2,3-DPG spanned a twenty-fold range across units of identical age (0.8–14.7 µmol/g Hb; median 4.8): some were already near-depleted at the earliest sampled timepoint, while others retained near-physiological concentrations. This heterogeneity collapsed rapidly - median values fell to 27% of day-3 levels by day 7 and by more than 90% by day 14 (β = −0.298 µmol/g Hb per day, p < 0.001) - and were below the limit of detection in most units after day 17. pH declined monotonically to 6.40 ± 0.04 by day 42 (β = −0.0163 units per day, p < 0.001). Units of identical storage age therefore differ markedly in the levels of the me-tabolite that governs oxygen unloading, and are depleted long before the 42-day expiry limit, suggesting that storage duration alone may incompletely capture the metabolic state of stored red blood cell units.
 editor: visual
 editor_options:
   chunk_output_type: console
@@ -56,12 +37,12 @@ options(scipen=999, digits=4)
 #| message: false
 #| warning: false
 library(broom.mixed) # for tidying up linear models 
-library(emmeans) # for the joint_tests() function 
+library(emmeans)     # for the joint_tests() function 
 library(flextable)
 library(ggthemes)
 library(here)
-library(janitor) # cleaning column names
-library(kableExtra) #nice tles
+library(janitor)     # cleaning column names
+library(kableExtra)  # nice tables
 library(lme4)
 library(lmerTest)
 library(patchwork)
@@ -81,11 +62,13 @@ path
 mydata <- readRDS(path)
 
 glimpse(mydata)
+head(mydata)
 ```
 
-# Convert Day 3 to 3 into a new column (day_num)
+# Convert Day_3 to 3 into a new column (day_num = 3)
 
 ```{r}
+library(dplyr)
 mydata <- mydata |> 
   dplyr::mutate(day_num = readr::parse_number(day))|>
   dplyr::select(day_num, everything())
@@ -104,6 +87,12 @@ long_data<- mydata |>
   ) |> 
   filter(!is.na(dpg_level))
 head(long_data)
+```
+
+# Export dataset for rechecking analysis
+
+```{r}
+write.csv(long_data, "long_data.csv", row.names = FALSE)
 ```
 
 # Summarize by day
@@ -157,43 +146,96 @@ shapiro.test(day3_dpg)
 
 ```{r}
 plot1<-ggplot(long_data, aes(x = factor(day_num), y = dpg_level)) +
-  stat_boxplot(geom = "errorbar", width = 0.3, color = "gray30", size = 0.62) +
-  geom_boxplot(fill = "gray90", color = "gray30", outlier.alpha = 0.5, linewidth = 0.62) +
-  geom_jitter(size = 3, width = 0.1, alpha = 0.65, color = "steelblue") +
-    theme_minimal(base_size = 12) +
+  stat_boxplot(
+      geom = "errorbar", 
+      width = 0.5, 
+      color = "gray30", 
+      linewidth = 0.6
+) +
+  geom_boxplot(
+      width= 0.7,
+      fill = "#DCEAF7", 
+      color = "black", 
+      linewidth = 0.6,
+      outlier.shape = NA
+) +
+  geom_jitter(
+      size = 3.1, 
+      width = 0.1, 
+      alpha = 0.5, 
+      color = "#1F77B4",
+) +
+  theme_bw(base_size = 12) +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", size = 13),
     axis.title.x = element_text(face = "bold", size = 13),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
     axis.text.y = element_text(face = "bold", size = 12)
-  ) +
+  )+
   labs(
-    title = "2,3-DPG by Day",
+    title = "",
     subtitle = "",
-    x = "Storage Day",
+    x = "Storage duration (days)",
     y = "2,3-DPG (µmol/g Hb)"
   )
-plot1
+plot1 + 
+  scale_y_continuous(breaks = seq(0.0, 18.0, by = 2.0)) +
+  annotate("segment", x = 1, xend = 1, y = 15.5, yend = 16.3, linewidth = 0.7) +
+  annotate("segment", x = 1, xend = 2, y = 16.3, yend = 16.3, linewidth = 0.7) +
+  annotate("segment", x = 2, xend = 2, y = 7.8, yend = 16.3, linewidth = 0.7) +
+  
+  # Inject exact p-value here. parse = TRUE enforces italic 'p'
+  annotate("text", x = 1.5, y = 15.6, color="darkblue",label = "italic(p) < 0.001", parse = TRUE, size = 3.8)
 ```
 
-# Spaghetti plot
+# Spaghetti plot (Figure 2)
 
 ```{r}
-plot2<-ggplot(long_data, aes(x = day_num, y = dpg_level, group = bag_id)) +
-  geom_line(color = "steelblue", alpha = 0.5, size = 0.7) +
-  geom_point(color = "steelblue", alpha = 0.6, size = 2) +
+plot2 <- ggplot(long_data, aes(x = day_num, y = dpg_level, group = bag_id)) +
+  geom_line(
+      color = "steelblue", 
+      alpha = 0.45, 
+      linewidth = 0.65) +
+  geom_point(
+      color = "steelblue", 
+      alpha = 0.6, 
+      size = 2.6) +
   
-  # 3. Add a heavy black line for the Population Mean
-  stat_summary(aes(group = 1), fun = mean, geom = "line", 
-               color = "red", size = 1.2) +
-theme_minimal(base_size = 12) +
+# Add a line for the Population Mean
+  stat_summary(aes(group = 1), 
+    fun = mean, 
+    geom = "line", 
+    color = "red", 
+    size = 1.2) +
+
+# Add the text label directly inside the plot
+  annotate(
+    "text", 
+    x = 11.5, 
+    y = 13.1, 
+    label = "Population Mean", 
+    color = "grey30", 
+    fontface = "bold", 
+    size = 4.5, 
+    hjust = 0) +
+           
+# Red line segment next to the text
+  annotate(
+      "segment", 
+      x = 9.5, 
+      xend = 11,
+      y = 13, 
+      yend = 13, 
+           color = "red", linewidth = 1.2) +
+theme_bw(base_size = 12) +
   theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
-    axis.title = element_text(face = "bold", size = 14),
-    axis.text = element_text(face = "bold", size = 12)
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 13),
+    axis.title = element_text(face = "bold", size = 12),
+    axis.text = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 12)
   ) +
-  labs(
+    labs(
     title = "Individual 2,3-DPG trajectories",
     subtitle = "",
     x = "Storage Day",
@@ -201,7 +243,9 @@ theme_minimal(base_size = 12) +
   ) +
   # X-axis only shows the days you measured
   scale_x_continuous(breaks = c(3, 7, 10, 14, 17))
-plot2
+plot2 + scale_y_continuous(
+    breaks = seq(0.0, 18.0, by = 2.0)
+  )
 
 ```
 
@@ -209,11 +253,11 @@ plot2
 
 ```{r}
 library(patchwork)
-plot1 + plot2
+plot2 + plot2b
 
 ```
 
-# Linear mixed models analysis for 2,3-DPG
+# LMMs analysis for 2,3-DPG
 
 ```{r}
 #| label: model1-dpg-lmm
@@ -221,7 +265,7 @@ plot1 + plot2
 #| warning: false
 
 # LMM: 2,3-DPG ~ storage day with random intercept for pRBC unit
-# REML = TRUE for unbiased variance component estimation
+
 model1 <- lmer(dpg_level ~ day_num + (1 | bag_id), data = long_data, REML = TRUE)
 summary(model1)
 
@@ -304,20 +348,37 @@ print(long_summary_ph)
 # Boxplot pH by day
 
 ```{r}
-plot3 <- ggplot(long_data_ph, aes(x = factor(day_num), y = pH)) +
-stat_boxplot(geom = "errorbar", width = 0.3, height = 0.2, color = "gray30", size = 0.62) +
-geom_boxplot(fill = "orange", color = "gray30", outlier.alpha = 0.5, linewidth = 0.62) +
-coord_cartesian(ylim = c(6.25, 7.40)) +
-scale_y_continuous(breaks = seq(6.25, 7.40, 0.1))+
-geom_jitter(size = 2, width = 0.1, alpha = 0.65, color = "steelblue") +
-theme_minimal(base_size = 12) +
-theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 13),
-    axis.title.x = element_text(face = "bold", size = 13),
-    axis.title.y = element_text(face = "bold", size = 13),
-    axis.text.x = element_text(face = "bold", size = 12,),
-    axis.text.y = element_text(face = "bold", size = 12)
+plot3 <- ggplot(
+    long_data_ph, aes(x = factor(day_num), y = pH)) +
+    stat_boxplot(
+      geom = "errorbar", 
+      width = 0.3, 
+      color = "gray30", 
+      linewidth = 0.62
+) +
+    geom_boxplot(
+        fill = "gray90", 
+        color = "gray30", 
+        outlier.alpha = 0.5, 
+        linewidth = 0.62
+) +
+    geom_jitter(
+        size = 2, 
+        width = 0.14, 
+        alpha = 0.56, 
+        color = "steelblue"
+) +
+    coord_cartesian(ylim = c(6.25, 7.45)) +
+    scale_y_continuous(breaks = seq(6.25, 7.45, 0.1)) +
+theme_bw(base_size = 12) +
+    theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 11),
+    axis.title.y = element_text(face = "bold", size = 11),
+    axis.text.x = element_text(face = "bold", size = 11,),
+    axis.text.y = element_text(face = "bold", size = 11)
   ) +
+    
 labs(
   title = "",
   subtitle = "",
@@ -325,8 +386,11 @@ labs(
   y = "pH"
   )
 
-plot3
+plot3 
 ```
+
+
+
 
 # Linear mixed models analysis for pH
 

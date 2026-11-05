@@ -7,26 +7,8 @@ author:
 date: "2026-02-02"
 date-modified: "2026-06-16"
 abstract: |
-  The efficacy of red blood cell (RBC) transfusions depends on oxygen
-  delivery, which deteriorates during storage due to the "storage lesion,"
-  notably 2,3-diphosphoglycerate (2,3-DPG) depletion. We characterized
-  the temporal dynamics of 2,3-DPG depletion and metabolic acidification
-  in 24 leukodepleted packed RBC units stored under standard conditions
-  from day 3 to 42. 2,3-DPG concentrations (µmol/g Hb) were quantified
-  using liquid chromatography–mass spectrometry (LC–MS) with isotopically
-  labeled internal standards, alongside parallel pH measurements. Baseline
-  (day 3) 2,3-DPG levels showed substantial inter-unit variability (median
-  4.8 µmol/g Hb; range 0.8–14.7). A rapid decline occurred across all
-  units, dropping to ~27% of baseline by day 7, >90% by day 14, and
-  falling below the detection limit after day 17. Mixed-effects modeling
-  confirmed a strong negative association between storage duration and
-  2,3-DPG (β = −0.298 µmol/g Hb/day; p < 0.001). Concurrently, pH
-  decreased progressively from 7.06 ± 0.06 to 6.40 ± 0.04 (p < 0.001).
-  In conclusion, 2,3-DPG depletion is an early, rapid phenomenon linked
-  to acidification that impairs oxygen unloading. Preserving 2,3-DPG is
-  a critical, modifiable target for improving stored RBC quality,
-  suggesting that storage duration alone may be an inadequate surrogate
-  for RBC metabolic quality.
+  Red blood cell (RBC) transfusion aims to restore tissue oxygen delivery, yet a stored unit's capacity to unload oxygen depends on 2,3-diphosphoglycerate (2,3-DPG), the principal allosteric modulator of hemoglobin–oxygen affinity. Randomized trials comparing fresher with older units have been consistently null, and all have used storage duration as the exposure variable. We asked whether storage age reflects the metabolic state of individual units. Twenty-four leukodepleted packed RBC units were sampled serially from day 3 to day 42 of standard cold storage. 2,3-DPG was quantified by liquid chromatography–mass spectrometry (LC–MS) with isotopically labelled internal standards, pH was measured in parallel, and trajectories were modelled by linear mixed effects with unit-level random intercepts. At day 3, 2,3-DPG spanned a twenty-fold range across units of identical age (0.8–14.7 µmol/g Hb; median 4.0): some were already near-depleted at the earliest sampled timepoint, while others retained near-physiological concentrations. This heterogeneity collapsed rapidly - median values fell to 20% of day-3 levels by day 7 and by more than 95% by day 14 (β = −0.298 µmol/g Hb per day, p < 0.001) - and were below the limit of detection in most units after day 17. pH declined monotonically to 6.40 ± 0.04 by day 42 (β = −0.0163 units per day, p < 0.001). Units of identical storage age therefore differ markedly in the levels of the me-tabolite that governs oxygen unloading, and are depleted long before the 42-day expiry limit, suggesting that storage duration alone may incompletely capture the metabolic state of stored red blood cell units.
+  
 editor: visual
 editor_options:
   chunk_output_type: console
