@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+message: "If you use this software or data, please cite the article below and the Zenodo archive."
+title: "dpg-prbc-storage-lesion: reproducible analysis of 2,3-DPG and pH dynamics in stored leukodepleted pRBC units"
+type: software
+version: "1.1"
+date-released: "2026-11-05"
+doi: 10.5281/zenodo.20786074
+license: MIT
+repository-code: "https://github.com/Sahuquillo/dpg-prbc-storage-lesion"
+authors:
+  - family-names: Peris
+    given-names: Marta
+    orcid: "https://orcid.org/0009-0006-0972-6854"
+    affiliation: "Vall d'Hebron Institut de Recerca (VHIR)"
+  - family-names: Sahuquillo
+    given-names: Juan
+    orcid: "https://orcid.org/0000-0003-0713-5875"
+    affiliation: "Vall d'Hebron Institut de Recerca (VHIR)"
+  - family-names: Ortuño
+    given-names: Ana
+    affiliation: "Vall d'Hebron Hospital Universitari"
+  - family-names: Pons
+    given-names: Veronica
+    affiliation: "Blood and Tissue Bank, Vall d'Hebron Hospital Universitari"
+  - family-names: Rierola
+    given-names: Marina
+    affiliation: "Blood and Tissue Bank, Vall d'Hebron Hospital Universitari"
+  - family-names: Poca
+    given-names: Maria Antonia
+    orcid: "https://orcid.org/0000-0002-3831-0536"
+    affiliation: "Vall d'Hebron Institut de Recerca (VHIR)"
+preferred-citation:
+  type: article
+  title: "Rapid Depletion of 2,3-DPG During Red Blood Cell Storage Assessed by Liquid Chromatography–Mass Spectrometry (LC–MS): Implications for Oxygen Delivery in Neurocritical Patients"
+  journal: Cells
+  year: 2026
+  status: in-press
+  authors:
+    - family-names: Peris
+      given-names: Marta
+    - family-names: Sahuquillo
+      given-names: Juan
+    - family-names: Ortuño
+      given-names: Ana
+    - family-names: Pons
+      given-names: Veronica
+    - family-names: Rierola
+      given-names: Marina
+    - family-names: Poca
+      given-names: Maria Antonia
